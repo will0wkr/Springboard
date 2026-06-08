@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>소나기</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black:      #000000;
+      --near-black: #1d1d1f;
+      --light-gray: #f5f5f7;
+      --white:      #ffffff;
+      --blue:       #0071e3;
+      --blue-h:     #0077ed;
+      --link:       #0066cc;
+      --text-body:  rgba(0,0,0,0.80);
+      --text-sec:   rgba(0,0,0,0.48);
+      --border:     rgba(0,0,0,0.10);
+      --err:        #d93025;
+    }
+    html, body {
+      background: var(--white); color: var(--near-black);
+      font-family: 'Noto Sans KR', -apple-system, 'Helvetica Neue', Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: sticky; top: 0; z-index: 100; height: 48px;
+      background: rgba(255,255,255,0.82);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 0.5px solid var(--border);
+      display: flex; align-items: center; padding: 0 22px;
+    }
+    .nav-inner {
+      max-width: 760px; width: 100%; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo { font-size: 18px; font-weight: 600; color: var(--near-black); text-decoration: none; letter-spacing: -0.01em; }
+    .nav-right { display: flex; align-items: center; gap: 0.8rem; }
+    .nav-link {
+      font-size: 14px; color: var(--link); text-decoration: none;
+      letter-spacing: -0.224px; transition: opacity .15s;
+    }
+    .nav-link:hover { opacity: 0.7; }
+    .nav-btn {
+      height: 28px; padding: 0 14px; border-radius: 980px;
+      font-family: inherit; font-size: 13px; font-weight: 400;
+      cursor: pointer; border: none; transition: background .15s;
+    }
+    .nav-btn-blue  { background: var(--blue); color: var(--white); }
+    .nav-btn-blue:hover { background: var(--blue-h); }
+    .nav-btn-red   { background: transparent; color: var(--err); border: 0.5px solid rgba(217,48,37,0.35); }
+    .nav-btn-red:hover { background: rgba(217,48,37,0.08); }
+    .nav-btn-ghost { background: transparent; color: var(--text-body); border: 0.5px solid rgba(0,0,0,0.20); }
+    .nav-btn-ghost:hover { background: var(--light-gray); }
+
+    /* ── 본문 ── */
+    .page { max-width: 760px; margin: 0 auto; padding: 52px 22px 80px; }
+
+    /* 조회 모드 */
+    #view-mode { display: none; }
+    .post-eyebrow {
+      font-size: 14px; color: var(--text-sec); letter-spacing: -0.224px;
+      margin-bottom: 10px;
+    }
+    .post-eyebrow a { color: var(--link); text-decoration: none; }
+    .post-eyebrow a:hover { text-decoration: underline; }
+    .view-title {
+      font-size: 40px; font-weight: 600; line-height: 1.10;
+      letter-spacing: -0.02em; color: var(--near-black); margin-bottom: 14px;
+    }
+    .view-meta {
+      display: flex; gap: 1.2rem;
+      font-size: 14px; color: var(--text-sec); letter-spacing: -0.224px;
+      padding-bottom: 24px; border-bottom: 0.5px solid var(--border);
+      margin-bottom: 32px;
+    }
+    .view-body {
+      font-size: 17px; font-weight: 400; line-height: 1.47;
+      letter-spacing: -0.374px; color: var(--text-body);
+      white-space: pre-wrap; word-break: break-word;
+    }
+    .view-actions {
+      display: flex; gap: 8px; margin-top: 48px;
+      padding-top: 24px; border-top: 0.5px solid var(--border);
+    }
+
+    /* 작성/수정 모드 */
+    #write-mode { display: none; }
+    .write-label {
+      font-size: 21px; font-weight: 600; letter-spacing: -0.02em;
+      color: var(--near-black); margin-bottom: 24px;
+    }
+    .write-field {
+      margin-bottom: 16px;
+    }
+    .write-field label { display: block; font-size: 12px; font-weight: 600; color: var(--text-sec); margin-bottom: 6px; }
+    .write-title-input {
+      width: 100%; height: 52px; padding: 0 16px;
+      background: var(--light-gray); border: 1px solid transparent;
+      border-radius: 10px; font-family: inherit;
+      font-size: 21px; font-weight: 400; letter-spacing: -0.02em;
+      color: var(--near-black); outline: none;
+      transition: border-color .18s, background .18s;
+    }
+    .write-title-input:focus { background: var(--white); border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,113,227,0.15); }
+    .write-title-input::placeholder { color: var(--text-sec); }
+    .write-body-input {
+      width: 100%; min-height: 360px; padding: 16px;
+      background: var(--light-gray); border: 1px solid transparent;
+      border-radius: 10px; font-family: inherit;
+      font-size: 17px; font-weight: 400; line-height: 1.47;
+      letter-spacing: -0.374px; color: var(--near-black);
+      outline: none; resize: vertical;
+      transition: border-color .18s, background .18s;
+    }
+    .write-body-input:focus { background: var(--white); border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,113,227,0.15); }
+    .write-body-input::placeholder { color: var(--text-sec); }
+    .write-actions { display: flex; gap: 8px; margin-top: 20px; justify-content: flex-end; }
+
+    /* ── 삭제 확인 모달 ── */
+    .modal-bg {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 200; opacity: 0; pointer-events: none; transition: opacity .2s;
+    }
+    .modal-bg.show { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--white); border-radius: 18px;
+      padding: 2rem; max-width: 320px; width: 90%; text-align: center;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.20);
+    }
+    .modal h3 { font-size: 21px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 8px; }
+    .modal p  { font-size: 14px; color: var(--text-sec); margin-bottom: 1.6rem; line-height: 1.47; letter-spacing: -0.224px; }
+    .modal-btns { display: flex; gap: 8px; justify-content: center; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 2rem; left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: var(--near-black); color: var(--white);
+      padding: 0.55rem 1.2rem; border-radius: 980px;
+      font-size: 14px; opacity: 0;
+      transition: opacity .25s, transform .25s;
+      pointer-events: none; z-index: 99;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.ok   { background: #1a8a4a; }
+    .toast.fail { background: var(--err); }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 24px 22px;
+      border-top: 0.5px solid var(--border);
+      font-size: 12px;
+      color: var(--text-sec);
+      letter-spacing: -0.12px;
+      margin-top: 40px;
+    }
+    footer span { color: var(--near-black); font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="/static/index.html">소나기</a>
+    <div class="nav-right" id="nav-right">
+      <!-- JS로 채워짐 -->
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+  <!-- 조회 모드 -->
+  <div id="view-mode">
+    <div class="post-eyebrow"><a href="/static/index.html">게시판</a> &rsaquo; 게시글</div>
+    <div class="view-title"  id="view-title"></div>
+    <div class="view-meta">
+      <span id="view-author"></span>
+      <span id="view-date"></span>
+    </div>
+    <div class="view-body" id="view-body"></div>
+    <div class="view-actions" id="view-actions" style="display:none">
+      <button class="nav-btn nav-btn-ghost" id="btn-edit">수정</button>
+      <button class="nav-btn nav-btn-red"   id="btn-delete">삭제</button>
+    </div>
+  </div>
+
+  <!-- 작성/수정 모드 -->
+  <div id="write-mode">
+    <div class="write-label" id="write-label">새 글 작성</div>
+    <div class="write-field">
+      <label>제목</label>
+      <input class="write-title-input" id="write-title" type="text" placeholder="제목을 입력하세요" maxlength="100"/>
+    </div>
+    <div class="write-field">
+      <label>내용</label>
+      <textarea class="write-body-input" id="write-body" placeholder="내용을 입력하세요…"></textarea>
+    </div>
+    <div class="write-actions">
+      <button class="nav-btn nav-btn-ghost" id="btn-cancel">취소</button>
+      <button class="nav-btn nav-btn-blue"  id="btn-submit">등록</button>
+    </div>
+  </div>
+</div>
+
+<!-- 삭제 확인 -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h3>게시글 삭제</h3>
+    <p>삭제 후에는 복구할 수 없습니다.<br>정말 삭제하시겠습니까?</p>
+    <div class="modal-btns">
+      <button class="nav-btn nav-btn-ghost" id="btn-modal-cancel">취소</button>
+      <button class="nav-btn nav-btn-red"   id="btn-modal-confirm">삭제</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Made in <span>SONAGI™ Springboard</span> with Claude
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = '';
+  const token = localStorage.getItem('access_token');
+  if (!token) { location.href = '/static/login.html'; }
+
+  let myEmail = '';
+  try { const p = JSON.parse(atob(token.split('.')[1])); myEmail = p.email || p.sub || ''; } catch {}
+
+  const params = new URLSearchParams(location.search);
+  const postId = params.get('id');
+  const isNew  = !postId;
+  let postData = null;
+
+  /* ── nav 버튼 ── */
+  document.getElementById('nav-right').innerHTML = `
+    <a class="nav-link" href="/static/index.html">← 목록</a>
+  `;
+
+  /* ── Toast ── */
+  function toast(msg, type='') {
+    const el = document.getElementById('toast');
+    el.textContent = msg; el.className = 'toast show ' + type;
+    setTimeout(() => { el.className = 'toast'; }, 2600);
+  }
+
+  function fmtDate(iso) {
+    const d = new Date(iso);
+    return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  /* ── 모드 전환 ── */
+  function showView() {
+    document.getElementById('view-mode').style.display = 'block';
+    document.getElementById('write-mode').style.display = 'none';
+  }
+  function showWrite(editing = false) {
+    document.getElementById('view-mode').style.display = 'none';
+    document.getElementById('write-mode').style.display = 'block';
+    document.getElementById('write-label').textContent = editing ? '게시글 수정' : '새 글 작성';
+    document.getElementById('btn-submit').textContent  = editing ? '수정 완료' : '등록';
+    document.title = editing ? '소나기 — 수정' : '소나기 — 새 글 작성';
+  }
+
+  /* ── 게시글 로드 ── */
+  async function loadPost() {
+    try {
+      const res = await fetch(`${API}/posts/${postId}`, { headers: { Authorization: `Bearer ${token}` } });
+      if (res.status === 401) { location.href = '/static/login.html'; return; }
+      if (!res.ok) { toast('게시글을 찾을 수 없습니다.', 'fail'); return; }
+      postData = await res.json();
+      document.title = `소나기 — ${postData.title}`;
+      document.getElementById('view-title').textContent  = postData.title;
+      document.getElementById('view-author').textContent = postData.author_email ?? '익명';
+      document.getElementById('view-date').textContent   = fmtDate(postData.created_at);
+      document.getElementById('view-body').textContent   = postData.content;
+      document.getElementById('view-actions').style.display = 'flex';
+    
+      showView();
+    } catch { toast('오류가 발생했습니다.', 'fail'); }
+  }
+
+  if (isNew) { showWrite(false); }
+  else        { loadPost(); }
+
+  /* ── 수정 ── */
+  document.getElementById('btn-edit').addEventListener('click', () => {
+    document.getElementById('write-title').value = postData.title;
+    document.getElementById('write-body').value  = postData.content;
+    showWrite(true);
+  });
+
+  /* ── 취소 ── */
+  document.getElementById('btn-cancel').addEventListener('click', () => {
+    if (isNew) location.href = '/static/index.html';
+    else       showView();
+  });
+
+  /* ── 제출 ── */
+  document.getElementById('btn-submit').addEventListener('click', async () => {
+    const title   = document.getElementById('write-title').value.trim();
+    const content = document.getElementById('write-body').value.trim();
+    if (!title)   { toast('제목을 입력하세요.', 'fail'); return; }
+    if (!content) { toast('내용을 입력하세요.', 'fail'); return; }
+    const btn = document.getElementById('btn-submit');
+    btn.disabled = true;
+    try {
+      const url    = isNew ? `${API}/posts` : `${API}/posts/${postId}`;
+      const method = isNew ? 'POST' : 'PUT';
+      const res    = await fetch(url, { method, headers: {'Content-Type':'application/json', Authorization:`Bearer ${token}`}, body: JSON.stringify({title, content}) });
+      if (!res.ok) { const d = await res.json(); throw new Error(d.detail || '요청 실패'); }
+      const saved = await res.json();
+      toast(isNew ? '게시글이 등록되었습니다.' : '수정되었습니다.', 'ok');
+      setTimeout(() => { location.href = `/static/post.html?id=${isNew ? saved.id : postId}`; }, 900);
+    } catch(e) { toast(e.message, 'fail'); }
+    finally { btn.disabled = false; }
+  });
+
+  /* ── 삭제 ── */
+  document.getElementById('btn-delete').addEventListener('click', () => {
+    document.getElementById('modal').classList.add('show');
+  });
+  document.getElementById('btn-modal-cancel').addEventListener('click', () => {
+    document.getElementById('modal').classList.remove('show');
+  });
+  document.getElementById('btn-modal-confirm').addEventListener('click', async () => {
+    try {
+      const res = await fetch(`${API}/posts/${postId}`, { method:'DELETE', headers:{Authorization:`Bearer ${token}`} });
+      if (!res.ok) throw new Error('삭제 실패');
+      toast('삭제되었습니다.', 'ok');
+      setTimeout(() => { location.href = '/static/index.html'; }, 800);
+    } catch(e) { toast(e.message, 'fail'); }
+  });
+</script>
+</body>
+</html>

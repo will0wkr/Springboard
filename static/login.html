@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>소나기</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --near-black: #1d1d1f;
+      --light-gray: #f5f5f7;
+      --white:      #ffffff;
+      --blue:       #0071e3;
+      --blue-h:     #0077ed;
+      --text-body:  rgba(0,0,0,0.80);
+      --text-sec:   rgba(0,0,0,0.48);
+      --err:        #d93025;
+    }
+    html, body {
+      height: 100%; background: var(--light-gray); color: var(--near-black);
+      font-family: 'Noto Sans KR', -apple-system, 'Helvetica Neue', Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .page {
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; padding: 2rem 1.5rem;
+    }
+    .logo-wrap { text-align: center; margin-bottom: 2.5rem; }
+    .logo-text  { font-size: 40px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.10; color: var(--near-black); }
+    .logo-sub   { font-size: 14px; color: var(--text-sec); margin-top: 4px; letter-spacing: 0.04em; }
+    .card {
+      background: var(--white); border-radius: 18px; width: 100%; max-width: 400px;
+      padding: 2.2rem 2rem; box-shadow: 0 4px 24px rgba(0,0,0,0.14);
+    }
+    .tabs {
+      display: flex; gap: 0; margin-bottom: 1.8rem;
+      background: var(--light-gray); border-radius: 8px; padding: 3px;
+    }
+    .tab {
+      flex: 1; padding: 0.5rem; background: transparent; border: none;
+      border-radius: 6px; font-family: inherit; font-size: 14px;
+      font-weight: 400; color: var(--text-sec); cursor: pointer;
+      transition: background .18s, color .18s, box-shadow .18s;
+    }
+    .tab.active {
+      background: var(--white); color: var(--near-black);
+      font-weight: 600; box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+    }
+    .form-group { margin-bottom: 1rem; }
+    label { display: block; font-size: 12px; font-weight: 600; color: var(--text-body); margin-bottom: 6px; }
+    input[type="email"], input[type="password"] {
+      width: 100%; height: 44px; padding: 0 14px;
+      background: var(--light-gray); border: 1px solid transparent;
+      border-radius: 10px; font-family: inherit; font-size: 17px;
+      color: var(--near-black); outline: none;
+      transition: border-color .18s, background .18s;
+    }
+    input:focus { background: var(--white); border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,113,227,0.15); }
+    input.is-error { border-color: var(--err); }
+    .err-msg { font-size: 12px; color: var(--err); margin-top: 5px; }
+    .btn-primary {
+      display: block; width: 100%; height: 44px; margin-top: 1.2rem;
+      background: var(--blue); color: var(--white); border: none;
+      border-radius: 980px; font-family: inherit; font-size: 17px;
+      font-weight: 400; cursor: pointer; transition: background .18s, transform .1s;
+    }
+    .btn-primary:hover  { background: var(--blue-h); }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .toast {
+      position: fixed; bottom: 2rem; left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: var(--near-black); color: var(--white);
+      padding: 0.55rem 1.2rem; border-radius: 980px;
+      font-size: 14px; opacity: 0;
+      transition: opacity .25s, transform .25s;
+      pointer-events: none; z-index: 99; white-space: nowrap;
+    }
+    .toast.show  { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.ok    { background: #1a8a4a; }
+    .toast.fail  { background: var(--err); }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 20px 22px;
+      font-size: 12px;
+      color: var(--text-sec);
+      letter-spacing: -0.12px;
+    }
+    footer span { color: var(--near-black); font-weight: 600; }
+  </style>
+</head>
+<body>
+<div class="page">
+  <div class="logo-wrap">
+    <div class="logo-text">소나기</div>
+    <div class="logo-sub">SONAGI BOARD</div>
+  </div>
+  <div class="card">
+    <div class="tabs">
+      <button class="tab active" data-tab="login">로그인</button>
+      <button class="tab" data-tab="signup">회원가입</button>
+    </div>
+    <div class="panel active" id="panel-login">
+      <div class="form-group">
+        <label>이메일</label>
+        <input type="email" id="login-email" placeholder="you@example.com"/>
+      </div>
+      <div class="form-group">
+        <label>비밀번호</label>
+        <input type="password" id="login-pw" placeholder="••••••••"/>
+        <div class="err-msg" id="login-err" style="display:none"></div>
+      </div>
+      <button class="btn-primary" id="btn-login">로그인</button>
+    </div>
+    <div class="panel" id="panel-signup">
+      <div class="form-group">
+        <label>이메일</label>
+        <input type="email" id="signup-email" placeholder="you@example.com"/>
+      </div>
+      <div class="form-group">
+        <label>비밀번호</label>
+        <input type="password" id="signup-pw" placeholder="8자 이상"/>
+      </div>
+      <div class="form-group">
+        <label>비밀번호 확인</label>
+        <input type="password" id="signup-pw2" placeholder="••••••••"/>
+        <div class="err-msg" id="signup-err" style="display:none"></div>
+      </div>
+      <button class="btn-primary" id="btn-signup">회원가입</button>
+    </div>
+  </div>
+  <footer>
+    Made in <span>SONAGI™ Springboard</span> with Claude
+  </footer>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+  const API = '';
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('panel-' + t.dataset.tab).classList.add('active');
+  }));
+  function toast(msg, type='') {
+    const el = document.getElementById('toast');
+    el.textContent = msg; el.className = 'toast show ' + type;
+    setTimeout(() => { el.className = 'toast'; }, 2600);
+  }
+  document.getElementById('btn-login').addEventListener('click', async () => {
+    const email = document.getElementById('login-email').value.trim();
+    const pw    = document.getElementById('login-pw').value;
+    const err   = document.getElementById('login-err');
+    err.style.display = 'none';
+    ['login-email','login-pw'].forEach(id => document.getElementById(id).classList.remove('is-error'));
+    if (!email || !pw) {
+      if (!email) document.getElementById('login-email').classList.add('is-error');
+      if (!pw)    document.getElementById('login-pw').classList.add('is-error');
+      err.textContent = '이메일과 비밀번호를 입력하세요.'; err.style.display = 'block'; return;
+    }
+    const btn = document.getElementById('btn-login');
+    btn.disabled = true; btn.textContent = '로그인 중…';
+    try {
+      const res  = await fetch(`${API}/auth/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email, password:pw}) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || '로그인 실패');
+      localStorage.setItem('access_token', data.access_token);
+      toast('로그인 성공', 'ok');
+      setTimeout(() => { location.href = '/static/index.html'; }, 800);
+    } catch(e) { err.textContent = e.message; err.style.display = 'block'; }
+    finally { btn.disabled = false; btn.textContent = '로그인'; }
+  });
+  document.getElementById('btn-signup').addEventListener('click', async () => {
+    const email = document.getElementById('signup-email').value.trim();
+    const pw    = document.getElementById('signup-pw').value;
+    const pw2   = document.getElementById('signup-pw2').value;
+    const err   = document.getElementById('signup-err');
+    err.style.display = 'none';
+    if (!email || !pw) { err.textContent = '모든 항목을 입력하세요.'; err.style.display='block'; return; }
+    if (pw.length < 8) { err.textContent = '비밀번호는 8자 이상이어야 합니다.'; err.style.display='block'; return; }
+    if (pw !== pw2)    { err.textContent = '비밀번호가 일치하지 않습니다.'; err.style.display='block'; return; }
+    const btn = document.getElementById('btn-signup');
+    btn.disabled = true; btn.textContent = '가입 중…';
+    try {
+      const res  = await fetch(`${API}/auth/signup`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email, password:pw}) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || '회원가입 실패');
+      toast('가입 완료! 로그인해 주세요.', 'ok');
+      document.querySelector('[data-tab="login"]').click();
+    } catch(e) { err.textContent = e.message; err.style.display = 'block'; }
+    finally { btn.disabled = false; btn.textContent = '회원가입'; }
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    document.querySelector('.panel.active .btn-primary')?.click();
+  });
+</script>
+</body>
+</html>

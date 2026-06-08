@@ -21,22 +21,27 @@
 ## 📁 프로젝트 구조
 
 ```
-sonagi/
+springboard/
 ├── app/
-│   ├── main.py           # FastAPI 앱 진입점
+│   ├── main.py              # FastAPI 앱 진입점
+│   ├── dependencies.py      # 인증/세션 의존성
 │   ├── core/
-│   │   └── config.py     # 환경변수 설정
+│   │   └── config.py        # 환경변수 설정
 │   ├── routers/
-│   │   ├── auth.py       # 인증 라우터
-│   │   └── posts.py      # 게시글 라우터
+│   │   ├── auth.py          # 인증 라우터
+│   │   └── posts.py         # 게시글 라우터
 │   └── schemas/
-│       ├── auth.py       # 인증 요청/응답 스키마
-│       └── posts.py      # 게시글 요청/응답 스키마
+│       ├── auth.py          # 인증 요청/응답 스키마
+│       └── posts.py         # 게시글 요청/응답 스키마
+├── static/
+│   ├── index.html           # 메인 페이지
+│   ├── login.html           # 로그인 페이지
+│   └── post.html            # 게시글 페이지
 ├── .env                  # 환경변수 (Git 제외)
-├── .gitignore
 ├── requirements.txt
 ├── Dockerfile
-└── docker-compose.yml
+├── docker-compose.yml
+└── README.md
 ```
 
 ## ✨ 주요 기능
@@ -73,6 +78,8 @@ docker compose up --build
 
 - API: http://localhost:8000
 - Swagger 문서: http://localhost:8000/docs
+
+실행 : uvicorn app.main:app --reload
 
 ## 📅 개발 일정
 

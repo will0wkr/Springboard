@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>소나기 게시판</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black:      #000000;
+      --near-black: #1d1d1f;
+      --light-gray: #f5f5f7;
+      --white:      #ffffff;
+      --blue:       #0071e3;
+      --blue-h:     #0077ed;
+      --link:       #0066cc;
+      --text-body:  rgba(0,0,0,0.80);
+      --text-sec:   rgba(0,0,0,0.48);
+      --border:     rgba(0,0,0,0.10);
+      --err:        #d93025;
+    }
+    html, body {
+      background: var(--light-gray);
+      font-family: 'Noto Sans KR', -apple-system, 'Helvetica Neue', Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Nav (Apple glass) ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      height: 48px;
+      background: rgba(255,255,255,0.82);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 0.5px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 22px;
+    }
+    .nav-inner {
+      max-width: 980px; width: 100%; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo {
+      font-size: 18px; font-weight: 600; color: var(--near-black);
+      letter-spacing: -0.01em; text-decoration: none;
+    }
+    .nav-right { display: flex; align-items: center; gap: 1rem; }
+    .nav-email { font-size: 12px; color: var(--text-sec); }
+    .nav-btn {
+      height: 28px; padding: 0 14px; border-radius: 980px;
+      font-family: inherit; font-size: 13px; font-weight: 400;
+      cursor: pointer; transition: background .18s;
+      text-decoration: none; display: inline-flex; align-items: center;
+    }
+    .nav-btn-blue { background: var(--blue); color: var(--white); border: none; }
+    .nav-btn-blue:hover { background: var(--blue-h); }
+    .nav-btn-ghost {
+      background: transparent; color: var(--text-body);
+      border: 0.5px solid rgba(0,0,0,0.20);
+    }
+    .nav-btn-ghost:hover { background: var(--light-gray); }
+
+    /* ── Hero section (dark) ── */
+    .hero {
+      background: var(--black);
+      text-align: center;
+      padding: 72px 22px 64px;
+    }
+    .hero-label {
+      font-size: 14px; font-weight: 400; color: rgba(255,255,255,0.56);
+      letter-spacing: 0.04em; margin-bottom: 12px;
+    }
+    .hero-title {
+      font-size: 56px; font-weight: 600; line-height: 1.07;
+      letter-spacing: -0.028em; color: var(--white);
+    }
+    .hero-sub {
+      font-size: 21px; font-weight: 300; line-height: 1.19;
+      color: rgba(255,255,255,0.72); margin-top: 12px;
+    }
+
+    /* ── 게시글 섹션 ── */
+    .section { background: var(--light-gray); padding: 52px 22px; }
+    .container { max-width: 760px; margin: 0 auto; }
+
+    .section-header {
+      display: flex; align-items: baseline; justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .section-title { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.14; }
+    .section-count { font-size: 14px; color: var(--text-sec); }
+
+    /* ── 목록 ── */
+    .post-list {
+      background: var(--white); border-radius: 18px;
+      overflow: hidden; margin-top: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .post-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 22px; gap: 1rem;
+      border-bottom: 0.5px solid var(--border);
+      cursor: pointer; text-decoration: none; color: inherit;
+      transition: background .15s;
+    }
+    .post-item:last-child { border-bottom: none; }
+    .post-item:hover { background: var(--light-gray); }
+    .post-title {
+      font-size: 17px; font-weight: 400; line-height: 1.47;
+      letter-spacing: -0.374px; color: var(--near-black);
+      margin-bottom: 3px;
+    }
+    .post-meta { font-size: 12px; color: var(--text-sec); letter-spacing: -0.12px; }
+    .post-date { font-size: 12px; color: var(--text-sec); white-space: nowrap; letter-spacing: -0.12px; }
+
+    /* ── Empty ── */
+    .empty {
+      background: var(--white); border-radius: 18px;
+      padding: 4rem 2rem; text-align: center; margin-top: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .empty-text { font-size: 17px; color: var(--text-sec); }
+
+    /* ── 스켈레톤 ── */
+    .skel {
+      background: linear-gradient(90deg, var(--light-gray) 25%, rgba(0,0,0,0.05) 50%, var(--light-gray) 75%);
+      background-size: 400% 100%;
+      animation: shimmer 1.4s infinite; border-radius: 4px;
+    }
+    @keyframes shimmer { 0%{background-position:100% 0} 100%{background-position:-100% 0} }
+    .skel-line { height: 14px; margin-bottom: 8px; }
+    .skel-sm   { height: 11px; width: 40%; }
+
+    /* ── 페이지네이션 ── */
+    .pagination { display: flex; justify-content: center; gap: 6px; margin-top: 24px; }
+    .pg-btn {
+      width: 32px; height: 32px; border-radius: 50%; border: none;
+      background: transparent; font-family: inherit; font-size: 14px;
+      color: var(--text-body); cursor: pointer; transition: background .15s;
+    }
+    .pg-btn:hover   { background: rgba(0,0,0,0.06); }
+    .pg-btn.active  { background: var(--near-black); color: var(--white); font-weight: 600; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 2rem; left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: var(--near-black); color: var(--white);
+      padding: 0.55rem 1.2rem; border-radius: 980px;
+      font-size: 14px; opacity: 0;
+      transition: opacity .25s, transform .25s;
+      pointer-events: none; z-index: 99;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.fail { background: var(--err); }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 24px 22px;
+      background: var(--light-gray);
+      border-top: 0.5px solid var(--border);
+      font-size: 12px;
+      color: var(--text-sec);
+      letter-spacing: -0.12px;
+    }
+    footer span { color: var(--near-black); font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="/static/index.html">소나기</a>
+    <div class="nav-right">
+      <span class="nav-email" id="nav-email"></span>
+      <a class="nav-btn nav-btn-blue" href="/static/post.html">글쓰기</a>
+      <button class="nav-btn nav-btn-ghost" id="btn-logout">로그아웃</button>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-label">SONAGI BOARD</div>
+  <div class="hero-title">소나기</div>
+  <div class="hero-sub">스터디 게시판</div>
+</div>
+
+<div class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-title">전체 게시글</div>
+      <div class="section-count" id="post-count"></div>
+    </div>
+
+    <div class="post-list" id="post-list">
+      ${Array.from({length:5}).map(()=>`
+        <div class="post-item" style="cursor:default">
+          <div style="flex:1">
+            <div class="skel skel-line" style="width:55%"></div>
+            <div class="skel skel-sm"></div>
+          </div>
+          <div class="skel" style="height:11px;width:48px;border-radius:4px"></div>
+        </div>`).join('')}
+    </div>
+
+    <div class="pagination" id="pagination"></div>
+  </div>
+</div>
+
+<footer>
+  Made in <span>SONAGI™ Springboard</span> with Claude
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = '';
+  const PAGE_SIZE = 10;
+  let totalPosts = 0;
+
+  const token = localStorage.getItem('access_token');
+  if (!token) { location.href = '/static/login.html'; }
+
+  try {
+    const p = JSON.parse(atob(token.split('.')[1]));
+    document.getElementById('nav-email').textContent = p.email || p.sub || '';
+  } catch {}
+
+  document.getElementById('btn-logout').addEventListener('click', () => {
+    localStorage.removeItem('access_token');
+    location.href = '/static/login.html';
+  });
+
+  function toast(msg, type='') {
+    const el = document.getElementById('toast');
+    el.textContent = msg; el.className = 'toast show ' + type;
+    setTimeout(() => { el.className = 'toast'; }, 2600);
+  }
+
+  function fmtDate(iso) {
+    const d = new Date(iso), now = new Date(), diff = (now - d) / 1000;
+    if (diff < 60)    return '방금 전';
+    if (diff < 3600)  return Math.floor(diff/60) + '분 전';
+    if (diff < 86400) return Math.floor(diff/3600) + '시간 전';
+    return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  async function loadPosts(page = 1) {
+    const skip = (page - 1) * PAGE_SIZE;
+    try {
+      const res = await fetch(`${API}/posts?skip=${skip}&limit=${PAGE_SIZE}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.status === 401) { location.href = '/static/login.html'; return; }
+      const data = await res.json();
+      const items = data.items ?? data;
+      totalPosts = data.total ?? items.length;
+      document.getElementById('post-count').textContent = `${totalPosts}개`;
+
+      const list = document.getElementById('post-list');
+      if (!items.length) {
+        list.innerHTML = `<div class="empty"><div class="empty-text">아직 게시글이 없습니다.</div></div>`;
+        return;
+      }
+      list.innerHTML = items.map(p => `
+        <a class="post-item" href="/static/post.html?id=${p.id}">
+          <div>
+            <div class="post-title">${esc(p.title)}</div>
+            <div class="post-meta">${esc(p.author_email ?? '익명')}</div>
+          </div>
+          <div class="post-date">${fmtDate(p.created_at)}</div>
+        </a>`).join('');
+
+      const totalPages = Math.ceil(totalPosts / PAGE_SIZE);
+      const pg = document.getElementById('pagination');
+      pg.innerHTML = totalPages > 1
+        ? Array.from({length:totalPages},(_,i)=>`<button class="pg-btn${i+1===page?' active':''}" onclick="loadPosts(${i+1})">${i+1}</button>`).join('')
+        : '';
+    } catch { toast('게시글을 불러오지 못했습니다.', 'fail'); }
+  }
+
+  loadPosts(1);
+</script>
+</body>
+</html>
