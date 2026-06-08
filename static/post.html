@@ -286,7 +286,11 @@
       document.getElementById('view-author').textContent = postData.author_email ?? '익명';
       document.getElementById('view-date').textContent   = fmtDate(postData.created_at);
       document.getElementById('view-body').textContent   = postData.content;
-      document.getElementById('view-actions').style.display = 'flex';
+      const meRes = await fetch(`${API}/users/me`, { headers: { Authorization: `Bearer ${token}` } });
+      const me = await meRes.json();
+      if (me.id === postData.author_id) {
+        document.getElementById('view-actions').style.display = 'flex';
+      }
     
       showView();
     } catch { toast('오류가 발생했습니다.', 'fail'); }
